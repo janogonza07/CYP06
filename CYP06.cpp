@@ -1,71 +1,91 @@
-#include <iostream>
-#include <fstream>
-#include <cstring>
-
-const int TAMTOKEN = 50;  // Tamaño máximo de las palabras
-const int MAX_ELEMENTOS = 50000;  // Máximo número de palabras en el diccionario
-
-void Diccionario(
-    const char* szNombre,
-    char szPalabras[][TAMTOKEN],
-    int iEstadisticas[],
-    int& iNumElementos
-) {
-    // ... (Código de la función Diccionario)
-}
-
 void ClonaPalabras(
     char* szPalabraLeida,
     char szPalabrasSugeridas[][TAMTOKEN],
     int& iNumSugeridas
 ) {
-    // ... (Código de la función ClonaPalabras)
-}
+    iNumSugeridas = 0;  // Inicializar el contador de palabras sugeridas
 
-void ListaCandidatas(
-    char szPalabrasSugeridas[][TAMTOKEN],
-    int iNumSugeridas,
-    char szPalabras[][TAMTOKEN],
-    int iEstadisticas[],
-    int iNumElementos,
-    char szListaFinal[][TAMTOKEN],
-    int iPeso[],
-    int& iNumLista
-) {
-    // ... (Código de la función ListaCandidatas)
-}
+    // Supresión de caracteres
+    int len = strlen(szPalabraLeida);
+    for (int i = 0; i < len; i++) {
+        // Crear una nueva palabra sin el caracter i
+        char palabraSugerida[TAMTOKEN];
+        int pos = 0;
+        for (int j = 0; j < len; j++) {
+            if (j != i) {
+                palabraSugerida[pos++] = szPalabraLeida[j];
+            }
+        }
+        palabraSugerida[pos] = '\0';
 
-int main() {
-    char szPalabras[MAX_ELEMENTOS][TAMTOKEN];
-    int iEstadisticas[MAX_ELEMENTOS];
-    int iNumElementos;
-    char szPalabraLeida[TAMTOKEN];
-    char szPalabrasSugeridas[MAX_ELEMENTOS][TAMTOKEN];
-    int iNumSugeridas;
-    char szListaFinal[MAX_ELEMENTOS][TAMTOKEN];
-    int iPeso[MAX_ELEMENTOS];
-    int iNumLista;
-
-    // Llama a la función Diccionario para cargar el archivo
-    Diccionario("nombre_archivo.txt", szPalabras, iEstadisticas, iNumElementos);
-
-    // Solicita al usuario una palabra a corregir
-    std::cout << "Ingrese la palabra a corregir: ";
-    std::cin >> szPalabraLeida;
-
-    // Llama a la función ClonaPalabras para obtener palabras sugeridas
-    ClonaPalabras(szPalabraLeida, szPalabrasSugeridas, iNumSugeridas);
-
-    // Llama a la función ListaCandidatas para obtener una lista final ordenada
-    ListaCandidatas(szPalabrasSugeridas, iNumSugeridas, szPalabras, iEstadisticas, iNumElementos, szListaFinal, iPeso, iNumLista);
-
-    // Imprime la lista final de palabras sugeridas
-    std::cout << "Palabras sugeridas ordenadas por peso:" << std::endl;
-    for (int i = 0; i < iNumLista; i++) {
-        std::cout << szListaFinal[i] << " (Peso: " << iPeso[i] << ")" << std::endl;
+        // Agregar la palabra sugerida a la lista
+        strcpy(szPalabrasSugeridas[iNumSugeridas], palabraSugerida);
+        iNumSugeridas++;
     }
 
-    return 0;
+    // Sustitución de caracteres
+    for (int i = 0; i < len; i++) {
+        for (char c = 'a'; c <= 'z'; c++) {
+            if (szPalabraLeida[i] != c) {
+                // Crear una nueva palabra con la sustitución
+                char palabraSugerida[TAMTOKEN];
+                strcpy(palabraSugerida, szPalabraLeida);
+                palabraSugerida[i] = c;
+
+                // Agregar la palabra sugerida a la lista
+                strcpy(szPalabrasSugeridas[iNumSugeridas], palabraSugerida);
+                iNumSugeridas++;
+            }
+        }
+    }
+
+    // Transposición de caracteres
+    for (int i = 0; i < len - 1; i++) {
+        // Crear una nueva palabra con la transposición
+        char palabraSugerida[TAMTOKEN];
+        strcpy(palabraSugerida, szPalabraLeida);
+        std::swap(palabraSugerida[i], palabraSugerida[i + 1]);
+
+        // Agregar la palabra sugerida a la lista
+        strcpy(szPalabrasSugeridas[iNumSugeridas], palabraSugerida);
+        iNumSugeridas++;
+    }
+
+    // Inserción de caracteres
+    for (int i = 0; i <= len; i++) {
+        for (char c = 'a'; c <= 'z'; c++) {
+            // Crear una nueva palabra con la inserción
+            char palabraSugerida[TAMTOKEN];
+            int pos = 0;
+            for (int j = 0; j < len + 1; j++) {
+                if (j == i) {
+                    palabraSugerida[pos++] = c;
+                }
+                else {
+                    palabraSugerida[pos++] = szPalabraLeida[j - (j > i ? 1 : 0)];
+                }
+            }
+            palabraSugerida[pos] = '\0';
+
+            // Agregar la palabra sugerida a la lista
+            strcpy(szPalabrasSugeridas[iNumSugeridas], palabraSugerida);
+            iNumSugeridas++;
+        }
+    }
+
+    // Ordenar la lista de palabras sugeridas alfabéticamente
+    for (int i = 0; i < iNumSugeridas - 1; i++) {
+        for (int j = i + 1; j < iNumSugeridas; j++) {
+            if (strcmp(szPalabrasSugeridas[i], szPalabrasSugeridas[j]) > 0) {
+                // Intercambiar palabras
+                char temp[TAMTOKEN];
+                strcpy(temp, szPalabrasSugeridas[i]);
+                strcpy(szPalabrasSugeridas[i], szPalabrasSugeridas[j]);
+                strcpy(szPalabrasSugeridas[j], temp);
+            }
+        }
+    }
 }
+
 
 
