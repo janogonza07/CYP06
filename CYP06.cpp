@@ -1,19 +1,71 @@
-// CYP06.cpp : Este archivo contiene la función "main". La ejecución del programa comienza y termina ahí.
-//
-
 #include <iostream>
+#include <fstream>
+#include <cstring>
 
-int main()
-{
-    std::cout << "Hello World!\n";
+const int TAMTOKEN = 50;  // Tamaño máximo de las palabras
+const int MAX_ELEMENTOS = 50000;  // Máximo número de palabras en el diccionario
+
+void Diccionario(
+    const char* szNombre,
+    char szPalabras[][TAMTOKEN],
+    int iEstadisticas[],
+    int& iNumElementos
+) {
+    // ... (Código de la función Diccionario)
 }
 
-// Ejecutar programa: Ctrl + F5 o menú Depurar > Iniciar sin depurar
-// Depurar programa: F5 o menú Depurar > Iniciar depuración
+void ClonaPalabras(
+    char* szPalabraLeida,
+    char szPalabrasSugeridas[][TAMTOKEN],
+    int& iNumSugeridas
+) {
+    // ... (Código de la función ClonaPalabras)
+}
 
-// Sugerencias para primeros pasos: 1. Use la ventana del Explorador de soluciones para agregar y administrar archivos
-//   2. Use la ventana de Team Explorer para conectar con el control de código fuente
-//   3. Use la ventana de salida para ver la salida de compilación y otros mensajes
-//   4. Use la ventana Lista de errores para ver los errores
-//   5. Vaya a Proyecto > Agregar nuevo elemento para crear nuevos archivos de código, o a Proyecto > Agregar elemento existente para agregar archivos de código existentes al proyecto
-//   6. En el futuro, para volver a abrir este proyecto, vaya a Archivo > Abrir > Proyecto y seleccione el archivo .sln
+void ListaCandidatas(
+    char szPalabrasSugeridas[][TAMTOKEN],
+    int iNumSugeridas,
+    char szPalabras[][TAMTOKEN],
+    int iEstadisticas[],
+    int iNumElementos,
+    char szListaFinal[][TAMTOKEN],
+    int iPeso[],
+    int& iNumLista
+) {
+    // ... (Código de la función ListaCandidatas)
+}
+
+int main() {
+    char szPalabras[MAX_ELEMENTOS][TAMTOKEN];
+    int iEstadisticas[MAX_ELEMENTOS];
+    int iNumElementos;
+    char szPalabraLeida[TAMTOKEN];
+    char szPalabrasSugeridas[MAX_ELEMENTOS][TAMTOKEN];
+    int iNumSugeridas;
+    char szListaFinal[MAX_ELEMENTOS][TAMTOKEN];
+    int iPeso[MAX_ELEMENTOS];
+    int iNumLista;
+
+    // Llama a la función Diccionario para cargar el archivo
+    Diccionario("nombre_archivo.txt", szPalabras, iEstadisticas, iNumElementos);
+
+    // Solicita al usuario una palabra a corregir
+    std::cout << "Ingrese la palabra a corregir: ";
+    std::cin >> szPalabraLeida;
+
+    // Llama a la función ClonaPalabras para obtener palabras sugeridas
+    ClonaPalabras(szPalabraLeida, szPalabrasSugeridas, iNumSugeridas);
+
+    // Llama a la función ListaCandidatas para obtener una lista final ordenada
+    ListaCandidatas(szPalabrasSugeridas, iNumSugeridas, szPalabras, iEstadisticas, iNumElementos, szListaFinal, iPeso, iNumLista);
+
+    // Imprime la lista final de palabras sugeridas
+    std::cout << "Palabras sugeridas ordenadas por peso:" << std::endl;
+    for (int i = 0; i < iNumLista; i++) {
+        std::cout << szListaFinal[i] << " (Peso: " << iPeso[i] << ")" << std::endl;
+    }
+
+    return 0;
+}
+
+
