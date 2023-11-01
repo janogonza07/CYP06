@@ -1,91 +1,47 @@
-void ClonaPalabras(
-    char* szPalabraLeida,
+void ListaCandidatas(
     char szPalabrasSugeridas[][TAMTOKEN],
-    int& iNumSugeridas
+    int iNumSugeridas,
+    char szPalabras[][TAMTOKEN],
+    int iEstadisticas[],
+    int iNumElementos,
+    char szListaFinal[][TAMTOKEN],
+    int iPeso[],
+    int& iNumLista
 ) {
-    iNumSugeridas = 0;  // Inicializar el contador de palabras sugeridas
+    iNumLista = 0;  // Inicializar el contador de palabras en la lista final
 
-    // Supresión de caracteres
-    int len = strlen(szPalabraLeida);
-    for (int i = 0; i < len; i++) {
-        // Crear una nueva palabra sin el caracter i
+    // Para cada palabra sugerida, buscarla en el diccionario y calcular su peso
+    for (int i = 0; i < iNumSugeridas; i++) {
         char palabraSugerida[TAMTOKEN];
-        int pos = 0;
-        for (int j = 0; j < len; j++) {
-            if (j != i) {
-                palabraSugerida[pos++] = szPalabraLeida[j];
-            }
-        }
-        palabraSugerida[pos] = '\0';
+        strcpy(palabraSugerida, szPalabrasSugeridas[i]);
 
-        // Agregar la palabra sugerida a la lista
-        strcpy(szPalabrasSugeridas[iNumSugeridas], palabraSugerida);
-        iNumSugeridas++;
-    }
-
-    // Sustitución de caracteres
-    for (int i = 0; i < len; i++) {
-        for (char c = 'a'; c <= 'z'; c++) {
-            if (szPalabraLeida[i] != c) {
-                // Crear una nueva palabra con la sustitución
-                char palabraSugerida[TAMTOKEN];
-                strcpy(palabraSugerida, szPalabraLeida);
-                palabraSugerida[i] = c;
-
-                // Agregar la palabra sugerida a la lista
-                strcpy(szPalabrasSugeridas[iNumSugeridas], palabraSugerida);
-                iNumSugeridas++;
+        // Buscar la palabra sugerida en el diccionario
+        for (int j = 0; j < iNumElementos; j++) {
+            if (strcmp(szPalabras[j], palabraSugerida) == 0) {
+                // Calcular el peso de la palabra sugerida (basado en su frecuencia en el diccionario)
+                iPeso[iNumLista] = iEstadisticas[j];
+                strcpy(szListaFinal[iNumLista], palabraSugerida);
+                iNumLista++;
+                break;
             }
         }
     }
 
-    // Transposición de caracteres
-    for (int i = 0; i < len - 1; i++) {
-        // Crear una nueva palabra con la transposición
-        char palabraSugerida[TAMTOKEN];
-        strcpy(palabraSugerida, szPalabraLeida);
-        std::swap(palabraSugerida[i], palabraSugerida[i + 1]);
+    // Ordenar la lista final de palabras sugeridas por peso
+    for (int i = 0; i < iNumLista - 1; i++) {
+        for (int j = i + 1; j < iNumLista; j++) {
+            if (iPeso[i] < iPeso[j]) {
+                // Intercambiar palabras y pesos
+                char tempPalabra[TAMTOKEN];
+                int tempPeso = iPeso[i];
 
-        // Agregar la palabra sugerida a la lista
-        strcpy(szPalabrasSugeridas[iNumSugeridas], palabraSugerida);
-        iNumSugeridas++;
-    }
+                strcpy(tempPalabra, szListaFinal[i]);
+                strcpy(szListaFinal[i], szListaFinal[j]);
+                strcpy(szListaFinal[j], tempPalabra);
 
-    // Inserción de caracteres
-    for (int i = 0; i <= len; i++) {
-        for (char c = 'a'; c <= 'z'; c++) {
-            // Crear una nueva palabra con la inserción
-            char palabraSugerida[TAMTOKEN];
-            int pos = 0;
-            for (int j = 0; j < len + 1; j++) {
-                if (j == i) {
-                    palabraSugerida[pos++] = c;
-                }
-                else {
-                    palabraSugerida[pos++] = szPalabraLeida[j - (j > i ? 1 : 0)];
-                }
-            }
-            palabraSugerida[pos] = '\0';
-
-            // Agregar la palabra sugerida a la lista
-            strcpy(szPalabrasSugeridas[iNumSugeridas], palabraSugerida);
-            iNumSugeridas++;
-        }
-    }
-
-    // Ordenar la lista de palabras sugeridas alfabéticamente
-    for (int i = 0; i < iNumSugeridas - 1; i++) {
-        for (int j = i + 1; j < iNumSugeridas; j++) {
-            if (strcmp(szPalabrasSugeridas[i], szPalabrasSugeridas[j]) > 0) {
-                // Intercambiar palabras
-                char temp[TAMTOKEN];
-                strcpy(temp, szPalabrasSugeridas[i]);
-                strcpy(szPalabrasSugeridas[i], szPalabrasSugeridas[j]);
-                strcpy(szPalabrasSugeridas[j], temp);
+                iPeso[i] = iPeso[j];
+                iPeso[j] = tempPeso;
             }
         }
     }
 }
-
-
-
