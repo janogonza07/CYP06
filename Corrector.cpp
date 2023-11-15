@@ -30,6 +30,8 @@ void	Diccionario			(char *szNombre, char szPalabras[][TAMTOKEN], int iEstadistic
 	char palabraDetectada[TAMTOKEN];
 	int i;
 	int indicePD;
+	//variables para el uso en burbujazo
+	int posicion; int pasada; char aux[TAMTOKEN];;
 	iNumElementos = 0;
 	// abrir el achivo
 	if (DEPURAR == 1)
@@ -48,36 +50,81 @@ void	Diccionario			(char *szNombre, char szPalabras[][TAMTOKEN], int iEstadistic
 			fgets(linea, sizeof(linea), fpDicc);
 			if (DEPURAR == 1)
 				printf("\n%s\n", linea);
+
 			for (i = 0; i < strlen(linea); i++)
 			{
-
 				// Detectar una palabra
 				if (linea[i] == ' ')
 				{
-					palabraDetectada[indicePD] = '\0';
-					strcpy_s(szPalabras[iNumElementos], TAMTOKEN, palabraDetectada);
-					iEstadisticas[iNumElementos] = 1;
-					if (DEPURAR == 1)
-						//printf("\np: %s", palabraDetectada);
-					indicePD = 0;
-					iNumElementos++;
-					// eliminar los espacios en blanco
-					// tabuladores y saltos de linea consecutivos				
-			    }
+					// Eliminar los espacios en blanco como palabras
+					if (indicePD > 0)
+					{
+						palabraDetectada[indicePD] = '\0';
+
+						// Buscar la palabra en szPalabras
+						int palabraExistente = 0;
+						int j;
+						for (j = 0; j < iNumElementos; j++)
+						{
+							if (strcmp(szPalabras[j], palabraDetectada) == 0)
+							{
+								// La palabra ya existe, incrementa la estadística
+								iEstadisticas[j]++;
+								palabraExistente = 1;
+							}
+						}
+
+						if (!palabraExistente)
+						{
+							// La palabra no existe, agrégala al final de szPalabras
+							strcpy_s(szPalabras[iNumElementos], TAMTOKEN, palabraDetectada);
+							iEstadisticas[iNumElementos] = 1;
+							iNumElementos++;
+						}
+
+						if (DEPURAR == 1)
+							//printf("\np: %s", palabraDetectada);
+
+							indicePD = 0;
+					}
+				}
 				else
 				{
 					if (linea[i] != '(' && linea[i] != ')')
 					{
-						palabraDetectada[indicePD] = linea[i];
-						indicePD++;
+						if (linea[i] != ',')
+						{
+							if (linea[i] != '.')
+							{
+								palabraDetectada[indicePD] = linea[i];
+								indicePD++;
+							}
+						}
 					}
 				}
 			}
+
+
+				
 			if (DEPURAR == 1)
 				printf("\nNumPalabras: %i\n", iNumElementos);
 			
 			// burbujazo
+			for (pasada = 0; pasada < iNumElementos - 1; pasada++)
+			{
+				for (posicion = 0; posicion < iNumElementos - 1; posicion++)
+				{
+					if (strcmp(szPalabras[posicion], szPalabras[posicion + 1]) > 0)
+					{
+						//realizar el intercambio
+				        strcpy_s(aux,szPalabras[posicion]);
+						strcpy_s(szPalabras[posicion], szPalabras[posicion + 1]);
+						strcpy_s(szPalabras[posicion + 1], aux);
+					}
+				}
+			}
 
+			//fin burbujazo 
 		}
 
 		fclose(fpDicc);
