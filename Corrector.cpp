@@ -15,6 +15,7 @@
 #include "corrector.h"
 #define DEPURAR 1
 
+
 //Funciones publicas del proyecto
 /*****************************************************************************************************************
 	DICCIONARIO: Esta funcion crea el diccionario completo
@@ -60,6 +61,10 @@ void	Diccionario			(char *szNombre, char szPalabras[][TAMTOKEN], int iEstadistic
 					if (indicePD > 0)
 					{
 						palabraDetectada[indicePD] = '\0';
+						// Convertir palabra a minúsculas
+						for (int k = 0; k < indicePD; k++) {
+							palabraDetectada[k] = towlower(palabraDetectada[k]);
+						}
 
 						// Buscar la palabra en szPalabras
 						int palabraExistente = 0;
@@ -96,8 +101,20 @@ void	Diccionario			(char *szNombre, char szPalabras[][TAMTOKEN], int iEstadistic
 						{
 							if (linea[i] != '.')
 							{
-								palabraDetectada[indicePD] = linea[i];
-								indicePD++;
+								if (linea[i] != ';')
+								{
+
+									if (linea[i] != '-') 
+									{
+										if (linea[i] != '"')
+										{
+
+
+											palabraDetectada[indicePD] = linea[i];
+											indicePD++;
+										}
+									}
+								}
 							}
 						}
 					}
@@ -148,7 +165,7 @@ void	Diccionario			(char *szNombre, char szPalabras[][TAMTOKEN], int iEstadistic
 	int		iPeso[],							//Peso de las palabras en la lista final
 	int &	iNumLista)							//Numero de elementos en la szListaFinal
 ******************************************************************************************************************/
-void	ListaCandidatas		(
+void	ListaCandidatas(
 	char	szPalabrasSugeridas[][TAMTOKEN],	//Lista de palabras clonadas
 	int		iNumSugeridas,						//Lista de palabras clonadas
 	char	szPalabras[][TAMTOKEN],				//Lista de palabras del diccionario
@@ -156,15 +173,17 @@ void	ListaCandidatas		(
 	int		iNumElementos,						//Numero de elementos en el diccionario
 	char	szListaFinal[][TAMTOKEN],			//Lista final de palabras a sugerir
 	int		iPeso[],							//Peso de las palabras en la lista final
-	int &	iNumLista)							//Numero de elementos en la szListaFinal
+	int& iNumLista)							//Numero de elementos en la szListaFinal
+
 {
 
 	//Sustituya estas lineas por su código
-	strcpy(szListaFinal[0], szPalabrasSugeridas[ 0] ); //la palabra candidata
+	strcpy(szListaFinal[0], szPalabrasSugeridas[0]); //la palabra candidata
 	iPeso[0] = iEstadisticas[0];			// el peso de la palabra candidata
-	
+
 	iNumLista = 1;							//Una sola palabra candidata
 }
+
 
 /*****************************************************************************************************************
 	ClonaPalabras: toma una palabra y obtiene todas las combinaciones y permutaciones requeridas por el metodo
@@ -173,11 +192,93 @@ void	ListaCandidatas		(
 	int &	iNumSugeridas)						//Numero de elementos en la lista
 ******************************************************************************************************************/
 void	ClonaPalabras(
-	char *	szPalabraLeida,						// Palabra a clonar
+	char* szPalabraLeida,						// Palabra a clonar
 	char	szPalabrasSugeridas[][TAMTOKEN], 	//Lista de palabras clonadas
-	int &	iNumSugeridas)						//Numero de elementos en la lista
+	int& iNumSugeridas)						//Numero de elementos en la lista
 {
-	//Sustituya estas lineas por su código
-	strcpy(szPalabrasSugeridas[0], szPalabraLeida); //lo que sea que se capture, es sugerencia
-	iNumSugeridas = 1;							//Una sola palabra sugerida
+	iNumSugeridas = 0;
+
+	// Operación de eliminación
+	for (int i = 0; i < strlen(szPalabraLeida); i++)
+	{
+		char palabraEliminada[TAMTOKEN];
+		int index = 0;
+		for (int j = 0; j < strlen(szPalabraLeida); j++)
+		{
+			if (j != i)
+			{
+				palabraEliminada[index++] = szPalabraLeida[j];
+			}
+		}
+		palabraEliminada[index] = '\0';
+		strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraEliminada);
+	}
+
+	// Operación de trasposición
+	for (int i = 0; i < strlen(szPalabraLeida) - 1; i++)
+	{
+		char palabraTraspuesta[TAMTOKEN];
+		strcpy(palabraTraspuesta, szPalabraLeida);
+		char temp = palabraTraspuesta[i];
+		palabraTraspuesta[i] = palabraTraspuesta[i + 1];
+		palabraTraspuesta[i + 1] = temp;
+		strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraTraspuesta);
+	}
+
+	// Operación de sustitución e inserción
+	for (int i = 0; i <= strlen(szPalabraLeida); i++)
+	{
+		iNumSugeridas = 0;
+
+		// Operación de eliminación
+		for (int i = 0; i < strlen(szPalabraLeida); i++)
+		{
+			char palabraEliminada[TAMTOKEN];
+			int index = 0;
+			for (int j = 0; j < strlen(szPalabraLeida); j++)
+			{
+				if (j != i)
+				{
+					palabraEliminada[index++] = szPalabraLeida[j];
+				}
+			}
+			palabraEliminada[index] = '\0';
+			strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraEliminada);
+		}
+
+		// Operación de trasposición
+		for (int i = 0; i < strlen(szPalabraLeida) - 1; i++)
+		{
+			char palabraTraspuesta[TAMTOKEN];
+			strcpy(palabraTraspuesta, szPalabraLeida);
+			char temp = palabraTraspuesta[i];
+			palabraTraspuesta[i] = palabraTraspuesta[i + 1];
+			palabraTraspuesta[i + 1] = temp;
+			strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraTraspuesta);
+		}
+
+		// Operación de sustitución e inserción
+		for (int i = 0; i <= strlen(szPalabraLeida); i++)
+		{
+			for (char c = 'a'; c <= 'z'; c++)
+			{
+				char palabraModificada[TAMTOKEN];
+				int index = 0;
+				for (int k = 0; k < strlen(szPalabraLeida) + 1; k++)
+				{
+					if (k == i)
+					{
+						palabraModificada[index++] = c;
+					}
+					else if (k != strlen(szPalabraLeida))
+					{
+						palabraModificada[index++] = szPalabraLeida[k];
+					}
+				}
+				palabraModificada[index] = '\0';
+				strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraModificada);
+			}
+		}
+	}
 }
+//Una sola palabra sugerida
