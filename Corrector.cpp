@@ -176,12 +176,42 @@ void	ListaCandidatas(
 	int& iNumLista)							//Numero de elementos en la szListaFinal
 
 {
+	iNumLista = 0;
 
-	//Sustituya estas lineas por su código
-	strcpy(szListaFinal[0], szPalabrasSugeridas[0]); //la palabra candidata
-	iPeso[0] = iEstadisticas[0];			// el peso de la palabra candidata
+	// Ordenar las sugerencias según su peso (frecuencia en el diccionario)
+	for (int i = 0; i < iNumSugeridas - 1; i++)
+	{
+		for (int j = 0; j < iNumSugeridas - i - 1; j++)
+		{
+			// Comparar por frecuencia en el diccionario (peso)
+			if (iEstadisticas[j] < iEstadisticas[j + 1])
+			{
+				// Realizar el intercambio
+				char temp[TAMTOKEN];
+				strcpy_s(temp, TAMTOKEN, szPalabrasSugeridas[j]);
+				strcpy_s(szPalabrasSugeridas[j], TAMTOKEN, szPalabrasSugeridas[j + 1]);
+				strcpy_s(szPalabrasSugeridas[j + 1], TAMTOKEN, temp);
 
-	iNumLista = 1;							//Una sola palabra candidata
+				// Intercambiar frecuencias
+				int tempEstadistica = iEstadisticas[j];
+				iEstadisticas[j] = iEstadisticas[j + 1];
+				iEstadisticas[j + 1] = tempEstadistica;
+			}
+		}
+	}
+
+	// Asignar memoria para la lista final
+	szListaFinal = new char* [iNumSugeridas];
+	iPeso = new int[iNumSugeridas];
+
+	// Agregar las palabras sugeridas a la lista final
+	for (int i = 0; i < iNumSugeridas; i++)
+	{
+		szListaFinal[i] = new char[TAMTOKEN];
+		strcpy_s(szListaFinal[i], TAMTOKEN, szPalabrasSugeridas[i]);
+		iPeso[i] = iEstadisticas[i];
+		iNumLista++;
+	}
 }
 
 
@@ -197,6 +227,25 @@ void	ClonaPalabras(
 	int& iNumSugeridas)						//Numero de elementos en la lista
 {
 	iNumSugeridas = 0;
+	
+
+	// Ciclo para letras del alfabeto
+	for (char c = 'a'; c <= 'z'; c++) {
+		char palabraModificada[TAMTOKEN];
+		palabraModificada[0] = c;
+		strcpy(palabraModificada + 1, szPalabraLeida);
+		strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraModificada);
+	}
+
+	// Ciclo para vocales acentuadas en su forma ASCII
+	const char vocalesAcentuadas[] = { '\xA0', '\x82', '\xA1', '\xA2', '\xA3' };
+	for (int i = 0; i < sizeof(vocalesAcentuadas); i++) {
+		char palabraModificada[TAMTOKEN];
+		palabraModificada[0] = vocalesAcentuadas[i];
+		strcpy(palabraModificada + 1, szPalabraLeida);
+		strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraModificada);
+	}
+	
 
 	// Operación de eliminación
 	for (int i = 0; i < strlen(szPalabraLeida); i++)
@@ -214,6 +263,10 @@ void	ClonaPalabras(
 		strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraEliminada);
 	}
 
+
+
+
+
 	// Operación de trasposición
 	for (int i = 0; i < strlen(szPalabraLeida) - 1; i++)
 	{
@@ -225,60 +278,51 @@ void	ClonaPalabras(
 		strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraTraspuesta);
 	}
 
-	// Operación de sustitución e inserción
+	// Operación de sustitución e inserción con vocales acentuadas en código ASCII
+	const char* vocalesAcentuadasASCII[] = { "\xA0", "\x82", "\xA1", "\xA2", "\xA3"};
+
 	for (int i = 0; i <= strlen(szPalabraLeida); i++)
 	{
-		iNumSugeridas = 0;
-
-		// Operación de eliminación
-		for (int i = 0; i < strlen(szPalabraLeida); i++)
+		for (char c = 'a'; c <= 'z'; c++)
 		{
-			char palabraEliminada[TAMTOKEN];
+			char palabraModificada[TAMTOKEN];
 			int index = 0;
-			for (int j = 0; j < strlen(szPalabraLeida); j++)
+			for (int k = 0; k < strlen(szPalabraLeida)+1; k++)
 			{
-				if (j != i)
+				if (k == i)
 				{
-					palabraEliminada[index++] = szPalabraLeida[j];
+					palabraModificada[index++] = c;
+				}
+				else if (k != strlen(szPalabraLeida))
+				{
+					palabraModificada[index++] = szPalabraLeida[k];
 				}
 			}
-			palabraEliminada[index] = '\0';
-			strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraEliminada);
+			palabraModificada[index] = '\0';
+			strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraModificada);
 		}
-
-		// Operación de trasposición
-		for (int i = 0; i < strlen(szPalabraLeida) - 1; i++)
+		
+         // Agregar vocales acentuadas en código ASCII
+		for (int j = 0; j < 5; j++) // 6 es la longitud del array vocalesAcentuadasASCII
 		{
-			char palabraTraspuesta[TAMTOKEN];
-			strcpy(palabraTraspuesta, szPalabraLeida);
-			char temp = palabraTraspuesta[i];
-			palabraTraspuesta[i] = palabraTraspuesta[i + 1];
-			palabraTraspuesta[i + 1] = temp;
-			strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraTraspuesta);
-		}
-
-		// Operación de sustitución e inserción
-		for (int i = 0; i <= strlen(szPalabraLeida); i++)
-		{
-			for (char c = 'a'; c <= 'z'; c++)
+			char palabraModificada[TAMTOKEN];
+			int index = 0;
+			for (int k = 0; k < strlen(szPalabraLeida) + 1; k++)
 			{
-				char palabraModificada[TAMTOKEN];
-				int index = 0;
-				for (int k = 0; k < strlen(szPalabraLeida) + 1; k++)
+				if (k == i)
 				{
-					if (k == i)
-					{
-						palabraModificada[index++] = c;
-					}
-					else if (k != strlen(szPalabraLeida))
-					{
-						palabraModificada[index++] = szPalabraLeida[k];
-					}
+					strcpy(palabraModificada + index, vocalesAcentuadasASCII[j]);
+					index += strlen(vocalesAcentuadasASCII[j]);
 				}
-				palabraModificada[index] = '\0';
-				strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraModificada);
+				else if (k != strlen(szPalabraLeida))
+				{
+					palabraModificada[index++] = szPalabraLeida[k];
+				}
 			}
+			palabraModificada[index] = '\0';
+			strcpy(szPalabrasSugeridas[iNumSugeridas++], palabraModificada);
 		}
 	}
+	
 }
-//Una sola palabra sugerida
+
